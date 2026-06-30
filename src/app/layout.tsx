@@ -1,0 +1,60 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/components/providers/AuthProvider";
+import { MongoSyncProvider } from "@/components/providers/MongoSyncProvider";
+
+
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+export const metadata: Metadata = {
+  title: "UPSC Mains Sprint — AI Mentor System",
+  description:
+    "Comprehensive AI-powered UPSC CSE Mains preparation dashboard with 6-month sprint planner, subject trackers, PYQ analysis, and AI mentor for Sociology optional aspirants.",
+  keywords: [
+    "UPSC",
+    "Civil Services",
+    "Mains",
+    "Sociology optional",
+    "AI mentor",
+    "study planner",
+  ],
+  authors: [{ name: "UPSC Mentor System" }],
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased bg-background text-foreground`}
+      >
+        <AuthProvider>
+          <MongoSyncProvider>
+            {children}
+          </MongoSyncProvider>
+        </AuthProvider>
+        <Toaster />
+      </body>
+    </html>
+  );
+}
