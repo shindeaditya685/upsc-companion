@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
-import { buildMonthlySeed } from "@/lib/seed-data";
 import { cn } from "@/lib/utils";
 import type { DayPlan } from "@/lib/types";
 
@@ -52,11 +51,7 @@ export function MonthlyPlannerView() {
   const monthlyPlans = useAppStore((s) => s.monthlyPlans);
   const updateDayPlan = useAppStore((s) => s.updateDayPlan);
 
-  // Seed July 2026 lazily on first view
   const effectiveDays = useMemo(() => {
-    if (selectedMonth === "2026-07" && (!monthlyPlans["2026-07"] || monthlyPlans["2026-07"].length === 0)) {
-      return buildMonthlySeed("2026-07");
-    }
     return monthlyPlans[selectedMonth] || [];
   }, [selectedMonth, monthlyPlans]);
 
@@ -184,7 +179,7 @@ export function MonthlyPlannerView() {
         <span className="flex items-center gap-1">
           <Circle className="size-2 fill-[#b91c1c] text-[#b91c1c]" /> Revision due
         </span>
-        <span>· July 2026 pre-populated with sample entries matching the Six-Month Planner.</span>
+        <span>· Click any day to add your GS focus, optional topic, and notes.</span>
       </p>
 
       <Dialog open={!!editDay} onOpenChange={() => setEditDay(null)}>

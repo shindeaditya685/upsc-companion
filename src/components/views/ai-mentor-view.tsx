@@ -68,7 +68,8 @@ export function AIMentorView() {
           `  - ${t.timeSlot} ${t.priority}: ${t.description} — ${t.completed ? "done" : "pending"}`
       )
       .join("\n");
-    return `Today (${selectedDate}) I completed ${done}/${todaysTasks.length} tasks (${completedHours.toFixed(1)}/${totalHours.toFixed(1)} hours).\n\nTasks:\n${summary}\n\nEnergy 7/10. Please review and generate tomorrow's adjusted plan.`;
+    const energy = totalHours > 0 ? Math.round((completedHours / totalHours) * 5) + 5 : 7;
+    return `Today (${selectedDate}) I completed ${done}/${todaysTasks.length} tasks (${completedHours.toFixed(1)}/${totalHours.toFixed(1)} hours).\n\nTasks:\n${summary}\n\nEnergy ${energy}/10. Please review and generate tomorrow's adjusted plan.`;
   };
 
   const sendMessage = async (text: string) => {
@@ -256,7 +257,7 @@ export function AIMentorView() {
                         : "border-[#b8893a] text-[#b8893a]"
                     }
                   >
-                    {source === "ai" ? "GLM AI" : "Rule-based fallback"}
+                    {source === "ai" ? "Groq AI" : "Rule-based fallback"}
                   </Badge>
                 ) : null}
               </div>

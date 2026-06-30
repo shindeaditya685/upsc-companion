@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import Groq from "groq-sdk";
 
 export const runtime = "nodejs";
+
+let client: Groq | null = null;
+
+function getClient(): Groq {
+  if (!client) {
+    client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  }
+  return client;
+}
 
 const SYSTEM_PROMPT = `You are an experienced UPSC CSE mentor. The aspirant is preparing for Mains December 2026 with Sociology optional. They run a 6-month sprint (Jul-Dec 2026), 8-9 hours/day, 6 days/week, weak-first GS sequencing (GS1 -> GS2 -> GS3 -> GS4).
 
@@ -44,9 +54,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const Groq = (await import("groq-sdk")).default;
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
+    const groq = getClient();
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
@@ -66,7 +74,6 @@ export async function POST(req: NextRequest) {
     console.error("[Groq] Mentor API error:", err);
   }
 
-  // Fallback rule-based mentor
   const fallback = fallbackMentor(userInput);
   return NextResponse.json({ response: fallback, source: "fallback" });
 }

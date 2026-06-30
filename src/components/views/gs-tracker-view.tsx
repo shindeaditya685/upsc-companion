@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, Fragment } from "react";
 import { BookOpenCheck, AlertTriangle } from "lucide-react";
 import { SectionHeader } from "@/components/shared/section-header";
 import { Card } from "@/components/ui/card";
@@ -76,8 +76,8 @@ export function GSTrackerView() {
             </thead>
             <tbody>
               {Object.entries(grouped).map(([paper, subjects]) => (
-                <>
-                  <tr key={`h-${paper}`} className="bg-[#f5f1e6]">
+                <Fragment key={paper}>
+                  <tr className="bg-[#f5f1e6]">
                     <td colSpan={7} className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#0f2d4a]">
                       {paper}
                     </td>
@@ -166,7 +166,7 @@ export function GSTrackerView() {
                       </tr>
                     );
                   })}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>

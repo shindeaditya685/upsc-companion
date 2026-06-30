@@ -8,6 +8,7 @@ import { ProgressBar } from "@/components/shared/progress-bar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { USER_PROFILE } from "@/lib/strategy-data";
 import { useAppStore, computeGSMaturity, parseHoursFromSlot, computeKnowledgeLevel } from "@/lib/store";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -132,7 +133,7 @@ export function DashboardView() {
         <StatCard
           label="Study Hours (7d)"
           value={weekHours.toFixed(1)}
-          sub={`Today: ${todayHours.toFixed(1)}h of 8.5h target`}
+          sub={`Today: ${todayHours.toFixed(1)}h of ${USER_PROFILE.dailyHoursTarget}h target`}
           icon={<Clock className="size-4" />}
           accent="navy"
         />
@@ -174,18 +175,18 @@ export function DashboardView() {
 
           <div className="mb-3">
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-[#5a5a5a]">Daily load (auto-capped at 8.5h)</span>
+              <span className="text-[#5a5a5a]">Daily load (auto-capped at {USER_PROFILE.dailyHoursTarget}h)</span>
               <span className="font-semibold text-[#0f2d4a]">
-                {todayHours.toFixed(1)}h / 8.5h
+                {todayHours.toFixed(1)}h / {USER_PROFILE.dailyHoursTarget}h
               </span>
             </div>
             <ProgressBar
-              value={(todayHours / 8.5) * 100}
-              variant={todayHours > 8.5 ? "red" : "gold"}
+              value={(todayHours / USER_PROFILE.dailyHoursTarget) * 100}
+              variant={todayHours > USER_PROFILE.dailyHoursTarget ? "red" : "gold"}
             />
-            {todayHours > 8.5 ? (
+            {todayHours > USER_PROFILE.dailyHoursTarget ? (
               <div className="mt-2 text-xs text-[#b91c1c] font-medium">
-                ⚠ Over 8.5h cap — Rule 2 (Prevent Over-Planning) suggests pruning lowest-priority task.
+                ⚠ Over {USER_PROFILE.dailyHoursTarget}h cap — Rule 2 (Prevent Over-Planning) suggests pruning lowest-priority task.
               </div>
             ) : null}
           </div>

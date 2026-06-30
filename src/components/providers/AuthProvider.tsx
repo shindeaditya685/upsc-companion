@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem("auth-token");
         }
       })
-      .catch(() => localStorage.removeItem("auth-token"))
+      .catch(() => console.error("[Auth] Token verification failed"))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -79,6 +79,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         setFormError(data.error || "Something went wrong");
+        return;
+      }
+
+      if (!data || typeof data.token !== "string" || !data.user) {
+        setFormError("Invalid server response. Please try again.");
         return;
       }
 

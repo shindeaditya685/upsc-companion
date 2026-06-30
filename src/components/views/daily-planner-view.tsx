@@ -25,6 +25,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useAppStore, parseHoursFromSlot } from "@/lib/store";
+import { USER_PROFILE } from "@/lib/strategy-data";
 import type { Priority, Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +35,7 @@ const priorityMeta: Record<Priority, { bg: string; text: string; label: string }
   P3: { bg: "bg-[#8a8a8a]", text: "text-[#fafaf7]", label: "P3 · Nice-to-have" },
 };
 
-const CAP_HOURS = 8.5;
+const CAP_HOURS = USER_PROFILE.dailyHoursTarget;
 
 export function DailyPlannerView() {
   const tasks = useAppStore((s) => s.tasks);
@@ -78,7 +79,8 @@ export function DailyPlannerView() {
       const summary = dayTasks
         .map((t) => `- ${t.timeSlot} ${t.priority}: ${t.description} (${t.completed ? "done" : "pending"})`)
         .join("\n");
-      const userInput = `Today (${selectedDate}) I completed ${dayTasks.filter((t) => t.completed).length}/${dayTasks.length} tasks (${completedHours.toFixed(1)}/${totalHours.toFixed(1)} hours). Here is my log:\n${summary}\n\nEnergy 7/10. Please generate tomorrow's adjusted plan.`;
+      const energy = totalHours > 0 ? Math.round((completedHours / totalHours) * 5) + 5 : 7;
+      const userInput = `Today (${selectedDate}) I completed ${dayTasks.filter((t) => t.completed).length}/${dayTasks.length} tasks (${completedHours.toFixed(1)}/${totalHours.toFixed(1)} hours). Here is my log:\n${summary}\n\nEnergy ${energy}/10. Please generate tomorrow's adjusted plan.`;
       const res = await fetch("/api/mentor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,7 +113,7 @@ export function DailyPlannerView() {
     <div>
       <SectionHeader
         title="Daily Planner"
-        subtitle="Task-level plan for the selected date. Each task has a time slot, priority, difficulty (1-5), learning outcome and revision date. Auto-capped at 8.5 hours."
+        subtitle={`Task-level plan for the selected date. Each task has a time slot, priority, difficulty (1-5), learning outcome and revision date. Auto-capped at ${USER_PROFILE.dailyHoursTarget} hours.`}
         icon={<CalendarCheck className="size-5" />}
         actions={
           <>

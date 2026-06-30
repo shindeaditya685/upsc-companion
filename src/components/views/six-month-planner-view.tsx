@@ -47,12 +47,6 @@ export function SixMonthPlannerView() {
         icon={<CalendarRange className="size-5" />}
       />
 
-      {plan.length === 0 ? (
-        <Card className="p-8 text-center text-[#5a5a5a]">
-          No weeks planned yet. Use the Daily/Weekly planners to build your six-month sprint.
-        </Card>
-      ) : (
-        <>
       {/* Phase legend */}
       <div className="flex flex-wrap gap-2 mb-4 text-xs">
         <span className="phase-1 px-3 py-1 rounded">Phase 1 · Foundation ({phase1Count} wks)</span>
@@ -154,8 +148,6 @@ export function SixMonthPlannerView() {
           ) : null}
         </DialogContent>
       </Dialog>
-    </>
-    )}
     </div>
   );
 }

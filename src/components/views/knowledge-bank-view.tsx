@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Library, ChevronDown, ChevronRight, Trophy, Target } from "lucide-react";
+import { Library, ChevronDown, ChevronRight, Trophy, Target, Plus } from "lucide-react";
 import { SectionHeader } from "@/components/shared/section-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,25 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAppStore, computeKnowledgeLevel } from "@/lib/store";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { cn } from "@/lib/utils";
-import type { KnowledgeTopic } from "@/lib/types";
+import type { KnowledgeTopic, LevelDeliverable } from "@/lib/types";
 
 const LEVEL_NAMES = [
   "L0 · Source Reading",
@@ -27,7 +42,9 @@ const LEVEL_NAMES = [
 export function KnowledgeBankView() {
   const knowledgeBank = useAppStore((s) => s.knowledgeBank);
   const updateKnowledgeTopic = useAppStore((s) => s.updateKnowledgeTopic);
+  const addKnowledgeTopic = useAppStore((s) => s.addKnowledgeTopic);
   const [expandedId, setExpandedId] = useState<string | null>(knowledgeBank[0]?.id ?? null);
+  const [adding, setAdding] = useState(false);
 
   const stats = useMemo(() => {
     const total = knowledgeBank.length;
@@ -73,6 +90,9 @@ export function KnowledgeBankView() {
               {stats.inProgress} In progress
             </Badge>
             <Badge variant="outline">{stats.notStarted} Not started</Badge>
+            <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
+              <Plus className="size-3.5 mr-1" /> Add Topic
+            </Button>
           </div>
         }
       />
@@ -168,7 +188,90 @@ export function KnowledgeBankView() {
       <p className="text-xs text-[#5a5a5a] mt-3">
         <strong>Agriculture (MSP, PDS, FCI, Land Reforms, Sustainable Agri)</strong> is the worked example at Level 6 — every level has a deliverable note showing what was produced. Use it as the template for other topics.
       </p>
+
+      <AddTopicDialog
+        open={adding}
+        onOpenChange={setAdding}
+        onAdd={addKnowledgeTopic}
+        nextId={knowledgeBank.length + 1}
+      />
     </div>
+  );
+}
+
+function AddTopicDialog({
+  open,
+  onOpenChange,
+  onAdd,
+  nextId,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onAdd: (topic: KnowledgeTopic) => void;
+  nextId: number;
+}) {
+  const [topic, setTopic] = useState("");
+  const [paper, setPaper] = useState<KnowledgeTopic["paper"]>("GS1");
+
+  const handleAdd = () => {
+    if (!topic.trim()) return;
+    const levels: LevelDeliverable[] = Array.from({ length: 7 }, (_, i) => ({
+      level: i,
+      name: LEVEL_NAMES[i],
+      status: false,
+      deliverable: "",
+    }));
+    onAdd({
+      id: `kb-${nextId}-${Date.now()}`,
+      topic: topic.trim(),
+      paper,
+      levels,
+    });
+    setTopic("");
+    setPaper("GS1");
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Topic</DialogTitle>
+          <DialogDescription>Add a new topic to your Knowledge Bank. You can set level deliverables after creation.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <div>
+            <label className="text-xs font-medium text-[#5a5a5a] mb-1 block">Topic name</label>
+            <Input
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g. Minimum Support Price"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-[#5a5a5a] mb-1 block">Paper</label>
+            <Select value={paper} onValueChange={(v) => setPaper(v as KnowledgeTopic["paper"])}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="GS1">GS1</SelectItem>
+                <SelectItem value="GS2">GS2</SelectItem>
+                <SelectItem value="GS3">GS3</SelectItem>
+                <SelectItem value="GS4">GS4</SelectItem>
+                <SelectItem value="Sociology P1">Sociology P1</SelectItem>
+                <SelectItem value="Sociology P2">Sociology P2</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleAdd} disabled={!topic.trim()}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -33,8 +33,8 @@ import {
 export function StrategyView() {
   const setActiveView = useAppStore((s) => s.setActiveView);
   const today = new Date();
-  const sprintStart = new Date("2026-07-01");
-  const examDate = new Date("2026-12-05");
+  const sprintStart = new Date(USER_PROFILE.sprintStart);
+  const examDate = new Date(USER_PROFILE.examDate);
   const daysToSprint = Math.ceil((sprintStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   const daysToExam = Math.ceil((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 

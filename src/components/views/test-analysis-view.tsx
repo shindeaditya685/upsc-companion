@@ -1,13 +1,23 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ClipboardList, ChevronRight, Activity, CheckCircle2 } from "lucide-react";
+import { ClipboardList, ChevronRight, Activity, CheckCircle2, Plus } from "lucide-react";
 import { SectionHeader } from "@/components/shared/section-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { ChartContainer, ChartConfig } from "@/components/ui/chart";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { useAppStore } from "@/lib/store";
@@ -30,6 +40,8 @@ export function TestAnalysisView() {
   const [selectedId, setSelectedId] = useState<string | null>(
     testAnalysis[0]?.id ?? null
   );
+  const [adding, setAdding] = useState(false);
+  const addTestEntry = useAppStore((s) => s.addTestEntry);
 
   const selected = useMemo(
     () => testAnalysis.find((t) => t.id === selectedId) ?? null,
@@ -73,6 +85,11 @@ export function TestAnalysisView() {
         title="Test Analysis"
         subtitle="Per-test 7-dimension scoring (1-5) with diagnosis and corrective actions. Radar chart shows your weakest dimensions — focus corrective actions there."
         icon={<ClipboardList className="size-5" />}
+        actions={
+          <Button onClick={() => setAdding(true)} size="sm" className="bg-[#0f2d4a] hover:bg-[#1a3d5e] text-[#fafaf7]">
+            <Plus className="size-4 mr-1" /> Log Test
+          </Button>
+        }
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -212,6 +229,61 @@ export function TestAnalysisView() {
           )}
         </Card>
       </div>
+
+      <AddTestDialog open={adding} onOpenChange={setAdding} onAdd={addTestEntry} />
     </div>
+  );
+}
+
+function AddTestDialog({
+  open,
+  onOpenChange,
+  onAdd,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onAdd: (t: TestEntry) => void;
+}) {
+  const [subject, setSubject] = useState("");
+  const [type, setType] = useState("Sectional test");
+  const submit = () => {
+    if (!subject.trim()) return;
+    onAdd({
+      id: `te${Date.now()}`,
+      date: new Date().toISOString().slice(0, 10),
+      subject,
+      type,
+      score: 0,
+      weakDimensions: [],
+      dimensions: { weakDimensions: 3, weakContent: 3, poorIntros: 3, poorConclusions: 3, lackOfData: 3, multiDimensional: 3, timeManagement: 3 },
+      diagnosis: { weakDimensions: "", weakContent: "", poorIntros: "", poorConclusions: "", lackOfData: "", multiDimensional: "", timeManagement: "" },
+      correctiveActions: [],
+    });
+    setSubject("");
+    onOpenChange(false);
+  };
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Log Test</DialogTitle>
+          <DialogDescription>Add a test result. Scores and diagnosis can be filled in the detail view.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <div>
+            <Label className="text-xs">Subject / Paper</Label>
+            <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. GS3 Agriculture" />
+          </div>
+          <div>
+            <Label className="text-xs">Type</Label>
+            <Input value={type} onChange={(e) => setType(e.target.value)} placeholder="e.g. Sectional test, Full mock" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={submit} className="bg-[#0f2d4a] hover:bg-[#1a3d5e] text-[#fafaf7]">Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
